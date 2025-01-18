@@ -1,0 +1,23 @@
+/*
+FORALL is used to perform bulk DML operations (INSERT, UPDATE, DELETE) on collections, which minimizes context switching.
+*/
+
+CREATE OR REPLACE PROCEDURE FORALL_EXAMPLE AS
+    TYPE ORDERID_TYPE IS TABLE OF SALES.ORDER_ID%TYPE INDEX BY PLS_INTEGER;
+    L_ORDER_IDS ORDERID_TYPE;
+BEGIN
+    -- Assume L_ORDER_IDS is populated with ORDER_IDs
+    SELECT ORDER_ID BULK COLLECT INTO L_ORDER_IDS FROM SALES;
+
+    -- Perform bulk update
+    FORALL i IN 1 .. L_ORDER_IDS.COUNT
+        UPDATE SALES SET TAX_AMOUNT = TOTAL_AMOUNT * 0.1 WHERE ORDER_ID = L_ORDER_IDS(i);
+        DBMS_OUTPUT.PUT_LINE('Completed');
+    COMMIT;
+END;
+/
+
+BEGIN
+    FORALL_EXAMPLE;
+END;
+/
